@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
-import axios from 'axios'; // Import axios for making requests
+
 import './loginSignUp.scss';
 
 const SignUp = () => {

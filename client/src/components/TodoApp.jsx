@@ -1,11 +1,11 @@
 import React, { useReducer, useEffect, Suspense } from "react";
-
 import todoReducer, { initialState } from "./TodoReducer";
 import axios from "axios";
 import '../index.scss';
 
-
+// Lazy load the TodoList component
 const TodoList = React.lazy(() => import('./TodoList'));
+
 const TodoApp = () => {
   const [todos, dispatch] = useReducer(todoReducer, initialState);
 

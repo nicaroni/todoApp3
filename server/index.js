@@ -58,16 +58,17 @@ app.get("/todos", verifyToken, async (req, res) => {
 
 // Update a todo by ID for the authenticated user
 // Update todo (mark as completed)
+// Update a todo by ID for the authenticated user (Only for description change)
 app.put("/todos/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { completed } = req.body;  // Whether the todo is completed or not
+  const { description } = req.body;  // Get the description (if editing)
   const userId = req.user.userId; // Get the user ID from the decoded token
 
   try {
-    // Update the completed status for the todo in the database
+    // Update the description for the todo in the database (without completed)
     const result = await pool.query(
-      "UPDATE todo SET completed = $1 WHERE todo_id = $2 AND user_id = $3 RETURNING *",
-      [completed, id, userId]  // Ensure the user can only update their own todos
+      "UPDATE todo SET description = $1 WHERE todo_id = $2 AND user_id = $3 RETURNING *",
+      [description, id, userId]  // Only updating description
     );
 
     // If no rows were updated, it means the todo was not found
@@ -78,7 +79,7 @@ app.put("/todos/:id", verifyToken, async (req, res) => {
     res.json(result.rows[0]);  // Return the updated todo
   } catch (err) {
     console.error("Error updating todo:", err.message);
-    res.status(500).json({ error: "Server error" });  // Return 500 if something went wrong
+    res.status(500).json({ error: "Server error" });
   }
 });
 
