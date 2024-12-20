@@ -166,6 +166,26 @@ app.post("/api/login", async (req, res) => {
 })();
 
 
+const cron = require("node-cron");
+
+cron.schedule("0 0 * * *", async () => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM todo WHERE created_at < NOW() - INTERVAL '7 days'"
+    );
+    console.log(`Deleted ${result.rowCount} old todos`);
+
+  } catch(err) {
+    console.log("Error deleting old todos", err);
+  }
+})
+
+
+
+
+
+
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
