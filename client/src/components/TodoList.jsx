@@ -1,8 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TodoItem from "./TodoItem";
 import TodoForm from "./TodoForm";
+import axios from "axios";
+
+import { jwtDecode } from "jwt-decode";
 
 const TodoList = ({ todos, dispatch }) => {
+  
+    useEffect(() => {
+      const fetchTodos = async () => {
+        const token = localStorage.getItem("authToken");  // Get the token from localStorage
+    
+        if (token) {
+          try {
+            // Decode the token to check if it's expired
+            const decodedToken = jwtDecode(token);
+
+            const currentTime = Date.now() / 1000;  // Current time in seconds
+            if (decodedToken.exp < currentTime) {
+              console.error("Token expired, please log in again.");
+              // You can redirect the user to the login page or show a message
+              return;
+            }
+    
+            const response = await axios.get("http://localhost:5000/todos", {
+              headers: {
+                "Authorization": `Bearer ${token}`,  // Attach token here
+              },
+            });
+    
+            dispatch({ type: "SET_TODOS", payload: response.data });
+          } catch (err) {
+            console.error("Error fetching todos:", err);
+          }
+        } else {
+          console.error("No token found, please log in.");
+        }
+      };
+    
+      fetchTodos();
+
+  }, [dispatch]);
   // State to toggle visibility of completed tasks
   const [showCompleted, setShowCompleted] = useState(false);
 
@@ -62,3 +100,7 @@ const TodoList = ({ todos, dispatch }) => {
 };
 
 export default TodoList;
+
+// TODO check why when refresh the page my completed* todos are going back to uncompleted ones
+
+

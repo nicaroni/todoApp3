@@ -12,12 +12,24 @@ const TodoApp = () => {
   // Fetch all todos from the server on component mount
   useEffect(() => {
     const fetchTodos = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/todos");
-        dispatch({ type: "SET_TODOS", payload: response.data });
-      } catch (err) {
-        console.error("Error fetching todos:", err);
+      const token = localStorage.getItem('token');
+
+      if (token) {
+        try {
+          const response = await axios.get("http://localhost:5000/todos", {
+          header: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+          dispatch({ type: "SET_TODOS", payload: response.data });
+        } catch (err) {
+          console.error("Error fetching todos:", err);
+        }
+      } else {
+        console.log("No token found, user might not be authenticated");
       }
+      
+      
     };
 
     fetchTodos();

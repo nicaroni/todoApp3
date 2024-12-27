@@ -33,6 +33,36 @@ const TodoItem = ({ todo, dispatch }) => {
     }
   };
 
+  const handleSaveEdit = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("No token found, please log in.");
+      return;
+    }
+  
+    try {
+      // Send PUT request to update the todo's description on the backend
+      const response = await axios.put(
+        `http://localhost:5000/todos/${todo.todo_id}`,
+        { description: input },
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+      );
+  
+      // Dispatch to update the local state with the new description
+      dispatch({
+        type: "UPDATE_TODO",
+        payload: { ...todo, description: response.data.description }, // Update with backend response
+      });
+      setIsEditing(false); // Exit edit mode
+    } catch (err) {
+      console.error("Error updating todo:", err);
+    }
+  };
+  
   const formatDate = (dateString) => {
     const options = {
       year: "numeric",
@@ -58,11 +88,7 @@ const TodoItem = ({ todo, dispatch }) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                dispatch({
-                  type: "UPDATE_TODO",
-                  payload: { ...todo, description: input },
-                });
-                setIsEditing(false);
+                handleSaveEdit(); // Save on "Enter" key press
               }
             }}
             className="form-control"

@@ -13,7 +13,13 @@ const todoReducer = (state, action) => {
         todo.todo_id === action.payload.todo_id
           ? { ...todo, completed: action.payload.completed }
           : todo
-      );  // Toggle completed status locally
+      ); 
+      case "UPDATE_TODO":
+        return state.map(todo =>
+          todo.todo_id === action.payload.todo_id
+            ? { ...todo, description: action.payload.description }
+            : todo
+        );  // Update description of the todo // Toggle completed status locally
     default:
       return state;
   }
