@@ -4,13 +4,31 @@ import axios from "axios";
 const TodoItem = ({ todo, dispatch }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [input, setInput] = useState(todo.description);
+  const [isCompleted, setIsCompleted] = useState(todo.completed);
 
-  const handleComplete = () => {
-    const updatedTodo = { ...todo, completed: !todo.completed };
 
-    // Dispatch to update the state locally
-    dispatch({ type: "TOGGLE_TODO_COMPLETED", payload: updatedTodo });
+  const handleComplete = async () => { // Make it async
+    const updatedTodo = { ...todo, completed: !isCompleted };
+  
+    try {
+      // Send PUT request to update the completed status in the backend
+      const response = await axios.put(
+        `http://localhost:5000/todos/${todo.todo_id}`,
+        { description: todo.description, completed: updatedTodo.completed },
+        { headers: { "Authorization": `Bearer ${localStorage.getItem("authToken")}` } }
+      );
+  
+      // Dispatch to update the local state with the new completed status
+      dispatch({
+        type: "TOGGLE_TODO_COMPLETED",
+        payload: { ...todo, completed: updatedTodo.completed },
+      });
+      setIsCompleted(updatedTodo.completed); // Update the completed status locally
+    } catch (err) {
+      console.error("Error updating todo:", err);
+    }
   };
+  
 
   const handleDelete = async () => {
     const token = localStorage.getItem("authToken"); // Get the token from localStorage
@@ -44,7 +62,9 @@ const TodoItem = ({ todo, dispatch }) => {
       // Send PUT request to update the todo's description on the backend
       const response = await axios.put(
         `http://localhost:5000/todos/${todo.todo_id}`,
-        { description: input },
+        { description: input,
+          completed: isCompleted,
+         },
         {
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -55,7 +75,7 @@ const TodoItem = ({ todo, dispatch }) => {
       // Dispatch to update the local state with the new description
       dispatch({
         type: "UPDATE_TODO",
-        payload: { ...todo, description: response.data.description }, // Update with backend response
+        payload: { ...todo, description: response.data.description, completed: response.data.completed }, // Update with backend response
       });
       setIsEditing(false); // Exit edit mode
     } catch (err) {
@@ -78,6 +98,11 @@ const TodoItem = ({ todo, dispatch }) => {
     <tr className={`todo-item-row ${todo.completed ? "completed" : ""}`}>
       <td className="circle" onClick={handleComplete}>
         {todo.completed ? "✓" : ""}
+        <input
+          type="checkbox"
+          checked={isCompleted}
+          onChange={handleComplete} // Toggle completed status on change
+        />
       </td>
       <td className="todo-date">{formatDate(todo.created_at)}</td>
       <td className="todo-description">

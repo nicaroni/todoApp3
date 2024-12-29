@@ -8,6 +8,7 @@ const TodoList = React.lazy(() => import('./TodoList'));
 
 const TodoApp = () => {
   const [todos, dispatch] = useReducer(todoReducer, initialState);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   // Fetch all todos from the server on component mount
   useEffect(() => {
@@ -20,8 +21,12 @@ const TodoApp = () => {
           header: {
             Authorization: `Bearer ${token}`,
           },
-        })
-          dispatch({ type: "SET_TODOS", payload: response.data });
+        });
+
+        const completedTodos = response.data.filter(todo => todo.completed);
+        const uncompletedTodos = response.data.filter(todo => !todo.completed);
+          
+        dispatch({ type: "SET_TODOS", payload: completedTodos, uncompletedTodos });
         } catch (err) {
           console.error("Error fetching todos:", err);
         }
