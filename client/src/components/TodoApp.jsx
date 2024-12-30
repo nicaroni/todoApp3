@@ -21,6 +21,7 @@ const TodoApp = () => {
           header: {
             Authorization: `Bearer ${token}`,
           },
+<<<<<<< HEAD
         });
 
         const completedTodos = response.data.filter(todo => todo.completed);
@@ -28,6 +29,11 @@ const TodoApp = () => {
           
         dispatch({ type: "SET_TODOS", payload: completedTodos, uncompletedTodos });
         } catch (err) {
+=======
+        })
+          dispatch({ type: "SET_TODOS", payload: response.data });
+        } catch (err) { 
+>>>>>>> 8f2d8a3 (Changes on server and frontend)
           console.error("Error fetching todos:", err);
         }
       } else {

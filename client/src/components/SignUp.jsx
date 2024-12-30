@@ -22,6 +22,7 @@ const SignUp = () => {
       });
   
       const data = await response.json();
+      console.log(data);
       if (response.ok) {
         // Store the JWT token in localStorage after sign-up
         localStorage.setItem('authToken', data.token);  // Store token after successful sign-up
