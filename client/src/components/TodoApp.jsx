@@ -22,7 +22,7 @@ const TodoApp = () => {
           },
         })
           dispatch({ type: "SET_TODOS", payload: response.data });
-        } catch (err) {
+        } catch (err) { 
           console.error("Error fetching todos:", err);
         }
       } else {

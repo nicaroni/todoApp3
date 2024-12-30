@@ -4,6 +4,7 @@ const pool = require("./db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -61,14 +62,15 @@ app.get("/todos", verifyToken, async (req, res) => {
 // Update a todo by ID for the authenticated user (Only for description change)
 app.put("/todos/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { description } = req.body;  // Get the description (if editing)
+  const { description, completed } = req.body;  // Get the description (if editing)
   const userId = req.user.userId; // Get the user ID from the decoded token
+
 
   try {
     // Update the description for the todo in the database (without completed)
     const result = await pool.query(
       "UPDATE todo SET description = $1 WHERE todo_id = $2 AND user_id = $3 RETURNING *",
-      [description, id, userId]  // Only updating description
+      [description, completed, id, userId]  // Only updating description
     );
 
     // If no rows were updated, it means the todo was not found
@@ -161,7 +163,7 @@ app.post("/api/login", async (req, res) => {
     const res = await pool.query("SELECT NOW()");
     console.log("Connection successful:", res.rows[0]);
   } catch (err) {
-    console.error("Connection error:", err.message);
+    console.error("Connection error:", err.message);  // Display full error message
   }
 })();
 
