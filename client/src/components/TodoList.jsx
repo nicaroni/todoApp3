@@ -102,5 +102,6 @@ const TodoList = ({ todos, dispatch }) => {
 export default TodoList;
 
 // TODO check why when refresh the page my completed* todos are going back to uncompleted ones
+// TODO completed tables problem in todoList and todoItem
 
 
