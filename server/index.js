@@ -69,7 +69,7 @@ app.put("/todos/:id", verifyToken, async (req, res) => {
   try {
     // Update the description for the todo in the database (without completed)
     const result = await pool.query(
-      "UPDATE todo SET description = $1 WHERE todo_id = $2 AND user_id = $3 RETURNING *",
+     "UPDATE todo SET description = $1, completed = $2 WHERE todo_id = $3 AND user_id = $4 RETURNING *",
       [description, completed, id, userId]  // Only updating description
     );
 
@@ -128,6 +128,7 @@ app.post("/api/signup", async (req, res) => {
 
     const token = jwt.sign({ userId: newUser.rows[0].user_id }, "your_jwt_secret", { expiresIn: "1h" });
     res.status(201).json({ message: "User created successfully", token });
+    
   } catch (err) {
     console.error("Error:", err.message);
     res.status(500).json({ error: "Server error" });

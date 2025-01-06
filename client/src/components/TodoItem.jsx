@@ -12,19 +12,12 @@ const TodoItem = ({ todo, dispatch }) => {
   
     try {
       // Send PUT request to update the completed status in the backend
-<<<<<<< HEAD
-      const response = await axios.put(
-=======
       await axios.put(
->>>>>>> 8f2d8a3 (Changes on server and frontend)
         `http://localhost:5000/todos/${todo.todo_id}`,
         { description: todo.description, completed: updatedTodo.completed },
         { headers: { "Authorization": `Bearer ${localStorage.getItem("authToken")}` } }
       );
-<<<<<<< HEAD
-=======
       
->>>>>>> 8f2d8a3 (Changes on server and frontend)
   
       // Dispatch to update the local state with the new completed status
       dispatch({
@@ -103,18 +96,10 @@ const TodoItem = ({ todo, dispatch }) => {
   };
 
   return (
-    <tr className={`todo-item-row ${todo.completed ? "completed" : ""}`}>
+    <tr className={`todo-item-row ${isCompleted ? "completed" : ""}`}>
       <td className="circle" onClick={handleComplete}>
         {todo.completed ? "✓" : ""}
-<<<<<<< HEAD
-        <input
-          type="checkbox"
-          checked={isCompleted}
-          onChange={handleComplete} // Toggle completed status on change
-        />
-=======
         
->>>>>>> 8f2d8a3 (Changes on server and frontend)
       </td>
       <td className="todo-date">{formatDate(todo.created_at)}</td>
       <td className="todo-description">

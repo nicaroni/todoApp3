@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, Suspense } from "react";
+import React, { useReducer, useEffect, Suspense, useState  } from "react";
 import todoReducer, { initialState } from "./TodoReducer";
 import axios from "axios";
 import '../index.scss';
@@ -21,27 +21,25 @@ const TodoApp = () => {
           header: {
             Authorization: `Bearer ${token}`,
           },
-<<<<<<< HEAD
+
         });
 
-        const completedTodos = response.data.filter(todo => todo.completed);
-        const uncompletedTodos = response.data.filter(todo => !todo.completed);
-          
-        dispatch({ type: "SET_TODOS", payload: completedTodos, uncompletedTodos });
-        } catch (err) {
-=======
-        })
-          dispatch({ type: "SET_TODOS", payload: response.data });
-        } catch (err) { 
->>>>>>> 8f2d8a3 (Changes on server and frontend)
-          console.error("Error fetching todos:", err);
-        }
-      } else {
-        console.log("No token found, user might not be authenticated");
-      }
-      
-      
-    };
+       // Filter the todos into completed and uncompleted
+       const completedTodos = response.data.filter(todo => todo.completed);
+       const uncompletedTodos = response.data.filter(todo => !todo.completed);
+       
+       // Dispatch both completed and uncompleted todos
+       dispatch({ type: "SET_TODOS", payload: { completedTodos, uncompletedTodos } });
+
+     } catch (err) {
+       console.error("Error fetching todos:", err);
+     }
+   } else {
+     console.log("No token found, user might not be authenticated");
+   }
+
+ };
+
 
     fetchTodos();
   }, []);
