@@ -7,7 +7,14 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+const corsOptions = {
+  origin: "https://yourfrontenddomain.com",  // Allow only your front-end domain
+  methods: ["GET", "POST", "PUT", "DELETE"],  // Allow only necessary methods
+  allowedHeaders: ["Content-Type", "Authorization"],  // Allow only necessary headers
+  credentials: true,  // Enable cookies/auth tokens to be sent
+  preflightContinue: false,  // Don't allow preflight requests to be passed along
+  optionsSuccessStatus: 204,  // Some legacy browsers choke on 204 status
+};
 // Middleware
 app.use(cors());
 app.use(express.json()); // Allow JSON request bodies
