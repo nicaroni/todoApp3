@@ -9,9 +9,30 @@ const SignUp = () => {
   const [username, setUsername] = useState('');
   const navigate = useNavigate(); // Initialize useNavigate
 
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+    if (!passwordRegex.test(password)) {
+      alert (
+       "Please try again. Your password must include at least:\n" +
+        "- One uppercase letter (A)\n" +
+        "- One lowercase letter (a)\n" +
+        "- One number (5)\n" +
+        "- One special character (*)\n" +
+        "- Minimum 10 characters in total." 
+      );
+      return false;
+    }
+    return true;
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
+    if(!validatePassword(password)){
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:5000/api/signup', {
         method: 'POST',
@@ -30,7 +51,12 @@ const SignUp = () => {
         console.log('Sign-up successful');
         navigate('/todos');  // Navigate to the Todo page after sign-up
       } else {
-        console.error('Error:', data.error);  // Show error message if sign-up fails
+        if (data.error === 'Email already exists') {
+          alert('This email is already registered. Please use a different email.')
+        } else {
+          alert(`Sign-up failed: ${data.error}`);
+        }
+         // Show error message if sign-up fails
       }
     } catch (error) {
       console.error('Error:', error);
