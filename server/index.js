@@ -3,7 +3,8 @@ const cors = require("cors");
 const pool = require("./db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,7 +18,20 @@ const corsOptions = {
 };
 // Middleware
 app.use(cors());
+app.use(helmet());
 app.use(express.json()); // Allow JSON request bodies
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+
+
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+});
+
+app.use(limiter);
 
 // Middleware to verify JWT
 const verifyToken = (req, res, next) => {
@@ -34,6 +48,10 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const validatePassword = (password) => {
+  return PASSWORD_REGEX.test(password)
+}
+
 // Create a new todo for the authenticated user
 app.post("/todos", verifyToken, async (req, res) => {
   const { description } = req.body;
@@ -46,8 +64,9 @@ app.post("/todos", verifyToken, async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Detailed Error:", err.message);
+    res.status(500).json({ error: "An unexpected error occurred. Please try again later." });
+    
   }
 });
 
@@ -59,8 +78,9 @@ app.get("/todos", verifyToken, async (req, res) => {
     const result = await pool.query("SELECT * FROM todo WHERE user_id = $1 ORDER BY todo_id", [userId]);
     res.json(result.rows); // Send the todos of the authenticated user
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Detailed Error:", err.message);
+    res.status(500).json({ error: "An unexpected error occurred. Please try again later." });
+
   }
 });
 
@@ -110,8 +130,9 @@ app.delete("/todos/:id", verifyToken, async (req, res) => {
 
     res.json({ message: "Todo deleted!", deletedTodo: result.rows[0] });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Detailed Error:", err.message);
+res.status(500).json({ error: "An unexpected error occurred. Please try again later." });
+
   }
 });
 
@@ -122,6 +143,18 @@ app.post("/api/signup", async (req, res) => {
   const userExists = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   if (userExists.rows.length > 0) {
     return res.status(400).json({ error: "Email already exists" });
+  }
+
+  if (!validatePassword(password)) {
+    return res.status(400).json({
+      error:
+        "Password must include at least:\n" +
+        "- One uppercase letter (A)\n" +
+        "- One lowercase letter (a)\n" +
+        "- One number (5)\n" +
+        "- One special character (*)\n" +
+        "- Minimum 10 characters in total.",
+    });
   }
 
   try {
@@ -137,8 +170,9 @@ app.post("/api/signup", async (req, res) => {
     res.status(201).json({ message: "User created successfully", token });
     
   } catch (err) {
-    console.error("Error:", err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Detailed Error:", err.message);
+    res.status(500).json({ error: "An unexpected error occurred. Please try again later." });
+    
   }
 });
 
@@ -160,8 +194,9 @@ app.post("/api/login", async (req, res) => {
     const token = jwt.sign({ userId: user.rows[0].user_id }, "your_jwt_secret", { expiresIn: "1h" });
     res.json({ message: "Login successful", token });
   } catch (err) {
-    console.error("Error:", err.message);
-    res.status(500).json({ error: "Server error" });
+    console.error("Detailed Error:", err.message);
+    res.status(500).json({ error: "An unexpected error occurred. Please try again later." });
+    
   }
 });
 
@@ -189,12 +224,6 @@ cron.schedule("0 0 * * *", async () => {
     console.log("Error deleting old todos", err);
   }
 })
-
-
-
-
-
-
 
 // Start the server
 app.listen(PORT, () => {

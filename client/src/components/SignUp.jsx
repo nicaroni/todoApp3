@@ -60,6 +60,7 @@ const SignUp = () => {
       }
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred during sign-up. Please try again later.');
     }
   };
   
