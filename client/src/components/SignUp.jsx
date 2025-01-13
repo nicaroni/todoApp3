@@ -119,3 +119,6 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
+
+//Todo add secomnd page for visual changes
